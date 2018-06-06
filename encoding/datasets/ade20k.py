@@ -75,7 +75,7 @@ def _get_ade20k_pairs(folder, split='train'):
     if split == 'train':
         img_folder = os.path.join(folder, 'images/training')
         mask_folder = os.path.join(folder, 'annotations/training')
-    else:
+    elif split == 'val':
         img_folder = os.path.join(folder, 'images/validation')
         mask_folder = os.path.join(folder, 'annotations/validation')
     for filename in os.listdir(img_folder):
