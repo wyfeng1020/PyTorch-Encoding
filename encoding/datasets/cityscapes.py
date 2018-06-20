@@ -11,7 +11,7 @@ class CityscapesSegmentation(BaseDataset):
     NUM_CLASS = 19
     #BASE_DIR = 'VOCdevkit/VOC2012'
     BASE_DIR = 'Cityscapes/data'
-    def __init__(self, root, split='train', mode=None, transform=None, 
+    def __init__(self, root=os.path.expanduser('~/.encoding/data'), split='train', mode=None, transform=None,
                  target_transform=None):
         super(CityscapesSegmentation, self).__init__(root, split, mode, transform, target_transform,base_size=1024, crop_size=480)
         _cityscapes_root = os.path.join(self.root, self.BASE_DIR)
