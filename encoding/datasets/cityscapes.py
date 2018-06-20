@@ -31,11 +31,11 @@ class CityscapesSegmentation(BaseDataset):
         self.masks = []
         with open(os.path.join(_split_f), "r") as lines:
             for line in tqdm(lines):
-                _image = os.path.join(_image_dir, line.rstrip('\n'))
+                _image = os.path.join(_image_dir, self.split + '/' + line.rstrip('\n'))
                 assert os.path.isfile(_image)
                 self.images.append(_image)
                 if self.mode != 'test':
-                    _mask = os.path.join(_mask_dir, line.rstrip('\n')[:-15] + "gtFine_labelIds.png")
+                    _mask = os.path.join(_mask_dir, self.split + '/' + line.rstrip('\n')[:-15] + "gtFine_labelIds.png")
                     assert os.path.isfile(_mask)
                     self.masks.append(_mask)
 
