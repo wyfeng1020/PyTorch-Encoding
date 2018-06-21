@@ -23,6 +23,8 @@ class CityscapesSegmentation(BaseDataset):
             _split_f = os.path.join(_cityscapes_root, 'train.txt')
         elif self.mode == 'val':
             _split_f = os.path.join(_cityscapes_root, 'val.txt')
+        elif self.mode == 'testval':
+            _split_f = os.path.join(_cityscapes_root, 'val.txt')
         elif self.mode == 'test':
             _split_f = os.path.join(_cityscapes_root, 'test.txt')
         else:
@@ -58,7 +60,7 @@ class CityscapesSegmentation(BaseDataset):
             img, target = self._val_sync_transform( img, target)
         else:
             assert self.mode == 'testval'
-            mask = self._mask_transform(mask)
+            target = self._mask_transform(target)
         # general resize, normalize and toTensor
         if self.transform is not None:
             #print("transform for input")
