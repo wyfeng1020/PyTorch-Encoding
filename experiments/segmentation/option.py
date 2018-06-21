@@ -76,6 +76,8 @@ class Options():
         # test option
         parser.add_argument('--test-folder', type=str, default=None,
                             help='path to test image folder')
+        parser.add_argument("--save", type=str, default='./result/cityscapes',
+                            help="Path to save result.")
         # the parser
         self.parser = parser
 

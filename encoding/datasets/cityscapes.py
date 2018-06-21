@@ -31,11 +31,13 @@ class CityscapesSegmentation(BaseDataset):
             raise RuntimeError('Unknown dataset split.')
         self.images = []
         self.masks = []
+        self.names = []
         with open(os.path.join(_split_f), "r") as lines:
             for line in tqdm(lines):
                 _image = os.path.join(_image_dir, self.split + '/' + line.rstrip('\n'))
                 assert os.path.isfile(_image)
                 self.images.append(_image)
+                self.names.append(line.rstrip('\n'))
                 if self.mode != 'test':
                     _mask = os.path.join(_mask_dir, self.split + '/' + line.rstrip('\n')[:-15] + "gtFine_labelIds.png")
                     assert os.path.isfile(_mask)
@@ -68,7 +70,7 @@ class CityscapesSegmentation(BaseDataset):
         if self.target_transform is not None:
             #print("transform for label")
             target = self.target_transform(target)
-        return img, target
+        return img, target, self.names[index]
 
     def label_mapping(self, input, mapping):
         output = np.copy(input)
