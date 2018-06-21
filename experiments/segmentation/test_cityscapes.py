@@ -114,7 +114,7 @@ def test(args):
                 output_col = colorize_mask(output)
                 output = Image.fromarray(output)
 
-                name = name[0].split('/')[-1]
+                name = name.split('/')[-1]
                 output.save('%s/%s' % (args.save, name))
                 output_col.save('%s/%s_color.png' % (args.save, name.split('.')[0]))
             return batch_correct, batch_label, batch_inter, batch_union, hist
