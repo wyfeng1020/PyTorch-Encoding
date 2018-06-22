@@ -3,6 +3,7 @@ from .base import *
 from .fcn import *
 from .psp import *
 from .encnet import *
+from .deeplab import *
 
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
@@ -10,5 +11,6 @@ def get_segmentation_model(name, **kwargs):
         'fcn': get_fcn,
         'psp': get_psp,
         'encnet': get_encnet,
+        'deeplab': get_deeplab,
     }
     return models[name.lower()](**kwargs)

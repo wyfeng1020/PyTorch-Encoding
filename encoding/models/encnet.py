@@ -137,13 +137,14 @@ def get_encnet(dataset='pascal_voc', backbone='resnet50', pretrained=False,
     """
     acronyms = {
         'pascal_voc': 'voc',
+        'pascal_aug': 'voc',
         'ade20k': 'ade',
         'pcontext': 'pcontext',
         'cityscapes': 'cityscapes',
     }
     kwargs['lateral'] = True if dataset.lower() == 'pcontext' else False
     # infer number of classes
-    from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, CityscapesSegmentation
+    from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, CityscapesSegmentation, ContextSegmentation
     model = EncNet(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file

@@ -96,7 +96,7 @@ class Trainer():
         train_loss = 0.0
         self.model.train()
         tbar = tqdm(self.trainloader)
-        for i, (image, target) in enumerate(tbar):
+        for i, (image, target, name) in enumerate(tbar):
             self.scheduler(self.optimizer, i, epoch, self.best_pred)
             self.optimizer.zero_grad()
             if torch_ver == "0.3":
@@ -135,7 +135,7 @@ class Trainer():
         self.model.eval()
         total_inter, total_union, total_correct, total_label = 0, 0, 0, 0
         tbar = tqdm(self.valloader, desc='\r')
-        for i, (image, target) in enumerate(tbar):
+        for i, (image, target, name) in enumerate(tbar):
             if torch_ver == "0.3":
                 image = Variable(image, volatile=True)
                 correct, labeled, inter, union = eval_batch(self.model, image, target)

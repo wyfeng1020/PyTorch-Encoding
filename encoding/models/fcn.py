@@ -38,11 +38,11 @@ class FCN(BaseNet):
     >>> model = FCN(nclass=21, backbone='resnet50')
     >>> print(model)
     """
-    def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
+    def __init__(self, nclass, backbone, aux=True, se_loss=False, lateral=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(FCN, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = FCNHead(2048, nclass, norm_layer)
+        self.head = FCNHead(2048, nclass, norm_layer=norm_layer)
         if aux:
-            self.auxlayer = FCNHead(1024, nclass, norm_layer)
+            self.auxlayer = FCNHead(1024, nclass, norm_layer=norm_layer)
 
     def forward(self, x):
         imsize = x.size()[2:]
@@ -94,9 +94,11 @@ def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'pascal_aug': 'voc',
         'pcontext': 'pcontext',
         'ade20k': 'ade',
+        'cityscapes': 'cityscapes',
     }
+    kwargs['lateral'] = True if dataset.lower() == 'pcontext' else False
     # infer number of classes
-    from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation
+    from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, CityscapesSegmentation, ContextSegmentation
     model = FCN(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file
