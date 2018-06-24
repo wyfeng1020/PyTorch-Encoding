@@ -118,7 +118,7 @@ class DEEPLABHead(nn.Module):
             c2 = self.connect[0](inputs[1])
             c3 = self.connect[1](inputs[2])
             feat = self.fusion(torch.cat([feat, c2, c3], 1))
-        return self.conv6(feat)
+        return tuple([self.conv6(feat)])
 
 
 def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
