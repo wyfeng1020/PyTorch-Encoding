@@ -17,7 +17,7 @@ import encoding.utils as utils
 from encoding.nn import SegmentationLosses, BatchNorm2d
 from encoding.parallel import DataParallelModel, DataParallelCriterion
 from encoding.datasets import get_segmentation_dataset, test_batchify_fn
-from encoding.models import get_model, get_segmentation_model, MultiEvalModule
+from encoding.models import get_model, get_segmentation_model, MultiEvalModule, MultiEvalModuleCityscapes
 
 from option import Options
 from PIL import Image
@@ -81,7 +81,7 @@ def test(args):
         print("=> loaded checkpoint '{}' (epoch {})".format(args.resume, checkpoint['epoch']))
 
     print(model)
-    evaluator = MultiEvalModule(model, testset.num_class).cuda()
+    evaluator = MultiEvalModuleCityscapes(model, testset.num_class).cuda()
     evaluator.eval()
 
     tbar = tqdm(test_data)

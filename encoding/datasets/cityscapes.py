@@ -32,6 +32,8 @@ class CityscapesSegmentation(BaseDataset):
         self.images = []
         self.masks = []
         self.names = []
+        self.crop_size_h = self.crop_size
+        self.crop_size_w = self.crop_size * 2
         with open(os.path.join(_split_f), "r") as lines:
             for line in tqdm(lines):
                 _image = os.path.join(_image_dir, self.split + '/' + line.rstrip('\n'))
@@ -47,19 +49,18 @@ class CityscapesSegmentation(BaseDataset):
             assert (len(self.images) == len(self.masks))
 
     def _val_sync_transform(self, img, mask):
-        crop_size_h = self.crop_size
-        crop_size_w = crop_size_h * 2
+
         w, h = img.size
-        oh = crop_size_h
+        oh = self.crop_size_h
         ow = int(1.0 * w * oh / h)
         img = img.resize((ow, oh), Image.BILINEAR)
         mask = mask.resize((ow, oh), Image.NEAREST)
         # center crop
         w, h = img.size
-        x1 = int(round((w - crop_size_w) / 2.))
-        y1 = int(round((h - crop_size_h) / 2.))
-        img = img.crop((x1, y1, x1+crop_size_w, y1+crop_size_h))
-        mask = mask.crop((x1, y1, x1+crop_size_w, y1+crop_size_h))
+        x1 = int(round((w - self.crop_size_w) / 2.))
+        y1 = int(round((h - self.crop_size_h) / 2.))
+        img = img.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
+        mask = mask.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
         # final transform
         return img, self._mask_transform(mask)
 
@@ -68,8 +69,6 @@ class CityscapesSegmentation(BaseDataset):
         if random.random() < 0.5:
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
             mask = mask.transpose(Image.FLIP_LEFT_RIGHT)
-        crop_size_h = self.crop_size
-        crop_size_w = crop_size_h * 2
         # random scale (short edge from 480 to 720)
         short_size = random.randint(int(self.base_size*0.5), int(self.base_size*2.0))
         w, h = img.size
@@ -82,17 +81,17 @@ class CityscapesSegmentation(BaseDataset):
         img = img.rotate(deg, resample=Image.BILINEAR)
         mask = mask.rotate(deg, resample=Image.NEAREST)
         # pad crop
-        if oh < crop_size_h:
-            padh = crop_size_h - oh if oh < crop_size_h else 0
-            padw = crop_size_w - ow if ow < crop_size_w else 0
+        if oh < self.crop_size_h:
+            padh = self.crop_size_h - oh if oh < self.crop_size_h else 0
+            padw = self.crop_size_w - ow if ow < self.crop_size_w else 0
             img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)
             mask = ImageOps.expand(mask, border=(0, 0, padw, padh), fill=0)
         # random crop crop_size
         w, h = img.size
-        x1 = random.randint(0, w - crop_size_w)
-        y1 = random.randint(0, h - crop_size_h)
-        img = img.crop((x1, y1, x1+crop_size_w, y1+crop_size_h))
-        mask = mask.crop((x1, y1, x1+crop_size_w, y1+crop_size_h))
+        x1 = random.randint(0, w - self.crop_size_w)
+        y1 = random.randint(0, h - self.crop_size_h)
+        img = img.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
+        mask = mask.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
         # gaussian blur as in PSP
         if random.random() < 0.5:
             img = img.filter(ImageFilter.GaussianBlur(
@@ -108,8 +107,8 @@ class CityscapesSegmentation(BaseDataset):
                 img = self.transform(img)
             return img, os.path.basename(self.images[index])
         target = Image.open(self.masks[index])
-        img = img.resize((1024, 512), Image.BILINEAR)
-        target = target.resize((1024, 512), Image.NEAREST)
+        img = img.resize((self.crop_size_w, self.crop_size_h), Image.BILINEAR)
+        target = target.resize((self.crop_size_w, self.crop_size_h), Image.NEAREST)
         # synchrosized transform
         if self.mode == 'train':
             img, target = self._sync_transform( img, target)
