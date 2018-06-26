@@ -38,6 +38,9 @@ class BaseNet(nn.Module):
         elif backbone == 'resnet101':
             self.pretrained = resnet.resnet101(pretrained=True, dilated=dilated,
                                                norm_layer=norm_layer, root=root)
+        elif backbone == 'resnet101coco':
+            self.pretrained = resnet.resnet101coco(pretrained=True, dilated=dilated,
+                                               norm_layer=norm_layer, root=root)
         elif backbone == 'resnet152':
             self.pretrained = resnet.resnet152(pretrained=True, dilated=dilated,
                                                norm_layer=norm_layer, root=root)
@@ -170,7 +173,7 @@ class MultiEvalModuleCityscapes(DataParallel):
     def __init__(self, module, nclass, device_ids=None,
                  base_size=512, crop_size=512, flip=True,
                  scales=[1.5, 1.75, 2.0, 2.25, 2.5, 2.75]):
-        super(MultiEvalModule, self).__init__(module, device_ids)
+        super(MultiEvalModuleCityscapes, self).__init__(module, device_ids)
         self.nclass = nclass
         self.base_size = base_size
         self.crop_size = crop_size

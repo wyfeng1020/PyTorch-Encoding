@@ -3,8 +3,8 @@ import math
 import torch
 import torch.utils.model_zoo as model_zoo
 import torch.nn as nn
-
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
+import os
+__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet101coco',
            'resnet152', 'BasicBlock', 'Bottleneck']
 
 model_urls = {
@@ -259,6 +259,20 @@ def resnet101(pretrained=False, root='~/.encoding/models', **kwargs):
         from ..models.model_store import get_model_file
         model.load_state_dict(torch.load(
             get_model_file('resnet101', root=root)), strict=False)
+    return model
+
+
+def resnet101coco(pretrained=False, root='~/.encoding/models', **kwargs):
+    """Constructs a ResNet-101 model.
+
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
+    if pretrained:
+        from ..models.model_store import get_model_file
+        model.load_state_dict(torch.load(os.path.join(root, 'MS_DeepLab_resnet_pretrained_COCO_init.pth')), strict=False)
+
     return model
 
 
