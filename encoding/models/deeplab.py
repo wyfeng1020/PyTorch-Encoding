@@ -145,7 +145,8 @@ def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'ade20k': 'ade',
         'cityscapes': 'cityscapes',
     }
-    kwargs['lateral'] = True if dataset.lower() == 'pcontext' else False
+    #kwargs['lateral'] = True if dataset.lower() == 'pcontext' else False
+    kwargs['lateral'] = True
     # infer number of classes
     from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, ContextSegmentation, CityscapesSegmentation
     model = DEEPLAB(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)

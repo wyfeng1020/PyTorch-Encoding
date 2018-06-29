@@ -271,6 +271,7 @@ def resnet101coco(pretrained=False, root='~/.encoding/models', **kwargs):
     model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
     if pretrained:
         from ..models.model_store import get_model_file
+        root = os.path.expanduser(root)
         model.load_state_dict(torch.load(os.path.join(root, 'MS_DeepLab_resnet_pretrained_COCO_init.pth')), strict=False)
 
     return model
