@@ -12,6 +12,7 @@ import torch
 from torch.utils import data
 import torchvision.transforms as transform
 from torch.nn.parallel.scatter_gather import gather
+import torch.nn as nn
 
 import encoding.utils as utils
 from encoding.nn import SegmentationLosses, BatchNorm2d
@@ -85,6 +86,7 @@ def test(args):
     evaluator.eval()
 
     tbar = tqdm(test_data)
+    interp = nn.Upsample(size=(1024, 2048), mode='bilinear')
     def eval_batch(image, dst, evaluator, eval_mode, hist, names):
         if eval_mode:
             # evaluation mode on validation set
@@ -92,6 +94,7 @@ def test(args):
             outputs = evaluator.parallel_forward(image)
             batch_inter, batch_union, batch_correct, batch_label = 0, 0, 0, 0
             for output, target, name in zip(outputs, targets, names):
+                output = interp(output)
                 correct, labeled = utils.batch_pix_accuracy(output.data.cpu(), target)
                 inter, union = utils.batch_intersection_union(
                     output.data.cpu(), target, testset.num_class)

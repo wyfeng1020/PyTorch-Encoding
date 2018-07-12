@@ -108,7 +108,8 @@ class CityscapesSegmentation(BaseDataset):
             return img, os.path.basename(self.images[index])
         target = Image.open(self.masks[index])
         img = img.resize((self.crop_size_w, self.crop_size_h), Image.BILINEAR)
-        target = target.resize((self.crop_size_w, self.crop_size_h), Image.NEAREST)
+        if self.mode != 'testval':
+            target = target.resize((self.crop_size_w, self.crop_size_h), Image.NEAREST)
         # synchrosized transform
         if self.mode == 'train':
             img, target = self._sync_transform( img, target)
