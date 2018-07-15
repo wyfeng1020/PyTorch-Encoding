@@ -144,6 +144,7 @@ def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'pcontext': 'pcontext',
         'ade20k': 'ade',
         'cityscapes': 'cityscapes',
+        'gta5': 'gta5',
     }
     #kwargs['lateral'] = True if dataset.lower() == 'pcontext' else False
     kwargs['lateral'] = True

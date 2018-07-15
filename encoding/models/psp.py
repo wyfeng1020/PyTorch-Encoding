@@ -58,9 +58,10 @@ def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'ade20k': 'ade',
         'pcontext': 'pcontext',
         'cityscapes': 'cityscapes',
+        'gta5': 'gta5',
     }
     # infer number of classes
-    from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, ContextSegmentation
+    from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, ContextSegmentation, GTA5Segmentation
     model = PSP(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file

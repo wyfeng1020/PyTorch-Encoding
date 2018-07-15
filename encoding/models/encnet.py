@@ -141,6 +141,7 @@ def get_encnet(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'ade20k': 'ade',
         'pcontext': 'pcontext',
         'cityscapes': 'cityscapes',
+        'gta5': 'gta5',
     }
     kwargs['lateral'] = True if dataset.lower() == 'pcontext' else False
     # infer number of classes
