@@ -9,3 +9,4 @@ docs/html/
 encoding/_ext/
 encoding.egg-info/
 .idea/
+.idea/workspace.xml

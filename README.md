@@ -8,6 +8,27 @@ created by [Hang Zhang](http://hangzh.com/)
 
 - Please visit the [link](http://hangzh.com/PyTorch-Encoding/experiments/segmentation.html) to examples of semantic segmentation.
 
+
+Install Package
+
+1. This package relies on PyTorch master branch (higher than stable released v0.4.0), please follow the instruction to install PyTorch from source. This PyTorch master branch need cuda9.0 or higher cuda version.  Otherwise, the encoding.py and syncbn.py will report error. I will try to reimplement the syncbn.py based on v0.4.0 in the future. For now, if you can not install PyTorch from source succussfully, you could use the branch 'pytorch0.4.0' of this project which uncomments the encoding.py and syncbn.py
+
+2. git clone https://github.com/wenqingchu/PyTorch-Encoding
+
+3. Since I use anaconda3, I install this project by "python setup.py install --prefix=~/anaconda3/"
+
+Train
+
+1. There are fcn.py, deeplab.py, psp.py and encnet.py model in encoding/model/.
+2. If you want to train on your own dataset, you should implement a dataset file like encoding/datasets/cityscapes.py.
+3. Please read experiment/segmentation/option.py to adjust the hyper parameter setting. I use batch_size=2, lr=0.003, 2 gpus, psp model, resnet101, 80 epoches, and the model can achieve mIoU=0.75 on cityscapes validation dataset. 
+4. Here is an example for train psp model on cityscapes.
+CUDA_VISIBLE_DEVICES=0,1,2,3 python train_cityscapes.py --dataset cityscapes --model psp --backbone resnet101 --aux
+
+Test
+
+CUDA_VISIBLE_DEVICES=0,1,2,3 python test_cityscapes.py --dataset cityscapes --model psp --backbone resnet101 --aux --eval --resume=runs/cityscapes/psp/default/checkpoint.pth.tar
+
 ## Citations
 
 **Context Encoding for Semantic Segmentation** [[arXiv]](https://arxiv.org/pdf/1803.08904.pdf)  

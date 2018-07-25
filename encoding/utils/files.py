@@ -15,7 +15,7 @@ def save_checkpoint(state, args, is_best, filename='checkpoint.pth.tar'):
         os.makedirs(directory)
     filename = directory + filename
     if args.dataset == 'gta5':
-        filename = filename + str(state.epoch)
+        filename = filename + str(state['epoch'])
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, directory + 'model_best.pth.tar')
