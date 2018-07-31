@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -12,7 +12,7 @@ class Options():
     def __init__(self):
         parser = argparse.ArgumentParser(description='PyTorch \
             Segmentation')
-        # model and dataset 
+        # model and dataset
         parser.add_argument('--model', type=str, default='encnet',
                             help='model name (default: encnet)')
         parser.add_argument('--backbone', type=str, default='resnet50',
@@ -91,7 +91,8 @@ class Options():
                 'pascal_aug': 50,
                 'pcontext': 80,
                 'ade20k': 120,
-                'cityscapes': 80
+                'cityscapes': 80,
+                'coco_stuff': 120
             }
             args.epochs = epoches[args.dataset.lower()]
         if args.batch_size is None:
@@ -106,6 +107,7 @@ class Options():
                 'ade20k': 0.01,
                 'cityscapes': 0.01,
                 #'cityscapes': 0.001,
+                'coco_stuff': 0.001,
             }
             args.lr = lrs[args.dataset.lower()] / 16 * args.batch_size
         return args

@@ -8,4 +8,6 @@ docs/src/
 docs/html/
 encoding/_ext/
 encoding.egg-info/
+encoding/lib/cpu
+experiments/segmentation/runs
 .idea/

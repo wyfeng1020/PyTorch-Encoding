@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -25,6 +25,25 @@ from option import Options
 torch_ver = torch.__version__[:3]
 if torch_ver == '0.3':
     from torch.autograd import Variable
+
+
+def get_1x_lr_params_NOscale(model):
+    b = []
+    b.append(model.conv1)
+    b.append(model.bn1)
+    b.append(model.layer1)
+    b.append(model.layer2)
+    b.append(model.layer3)
+    b.append(model.layer4)
+
+    for i in range(len(b)):
+        for j in b[i].modules():
+            jj = 0
+            for k in j.parameters():
+                jj+=1
+                if k.requires_grad:
+                    yield k
+
 
 class Trainer():
     def __init__(self, args):
@@ -52,12 +71,13 @@ class Trainer():
                                        se_loss = args.se_loss)
         print(model)
         # optimizer using different LR
-        params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr},]
+        #params_list = [{'params': model.pretrained.parameters(), 'lr': args.lr},]
+        params_list = [{'params': get_1x_lr_params_NOscale(model.pretrained), 'lr': args.lr},]
         if hasattr(model, 'head'):
             params_list.append({'params': model.head.parameters(), 'lr': args.lr*10})
         if hasattr(model, 'auxlayer'):
             params_list.append({'params': model.auxlayer.parameters(), 'lr': args.lr*10})
-        optimizer = torch.optim.SGD(params_list, 
+        optimizer = torch.optim.SGD(params_list,
                     lr=args.lr,
                     momentum=args.momentum,
                     weight_decay=args.weight_decay)
