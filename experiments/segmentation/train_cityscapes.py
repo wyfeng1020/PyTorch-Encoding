@@ -10,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 import torch
-from torch.utils import data
+from torch.utils import datat
 import torchvision.transforms as transform
 from torch.nn.parallel.scatter_gather import gather
 
