@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -86,13 +86,15 @@ class MultiEvalModule(DataParallel):
     """Multi-size Segmentation Eavluator"""
     def __init__(self, module, nclass, device_ids=None,
                  base_size=520, crop_size=480, flip=True,
-                 scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75]):
+                 #scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75]):
+                 scales=[1.0]):
         super(MultiEvalModule, self).__init__(module, device_ids)
         self.nclass = nclass
         self.base_size = base_size
         self.crop_size = crop_size
         self.scales = scales
-        self.flip = flip
+        #self.flip = flip
+        self.flip = False
 
     def parallel_forward(self, inputs, **kwargs):
         """Multi-GPU Mult-size Evaluation

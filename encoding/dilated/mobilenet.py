@@ -3,7 +3,7 @@ import sys
 import torch
 import torch.nn as nn
 import math
-from lib.nn import SynchronizedBatchNorm2d
+#from lib.nn import SynchronizedBatchNorm2d
 
 try:
     from urllib import urlretrieve
@@ -11,7 +11,7 @@ except ImportError:
     from urllib.request import urlretrieve
 
 
-__all__ = ['mobilenet', 'mobilenet18', 'mobilenet50', 'mobilenet101'] # resnet101 is coming soon!
+__all__ = ['mobilenet'] # resnet101 is coming soon!
 
 model_urls = {
         'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -181,6 +181,8 @@ class MobileNetV2(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
+                #for i in m.parameters():
+                #    i.requires_grad = False
             elif isinstance(m, nn.Linear):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
@@ -194,7 +196,7 @@ def mobilenet(pretrained=False, **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = mobilenet.MobileNetV2(n_class=1000)
+    model = MobileNetV2(n_class=1000)
     state_dict = torch.load('/home/chuwenqing/.encoding/models/mobilenetv2.pth.tar')  # add map_location='cpu' if no gpu
     model.load_state_dict(state_dict)
     return model

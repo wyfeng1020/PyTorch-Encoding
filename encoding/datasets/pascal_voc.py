@@ -9,7 +9,7 @@ from .base import BaseDataset
 
 class VOCSegmentation(BaseDataset):
     CLASSES = [
-        'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 
+        'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
         'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse',
         'motorbike', 'person', 'potted-plant', 'sheep', 'sofa', 'train',
         'tv/monitor', 'ambigious'
@@ -24,6 +24,8 @@ class VOCSegmentation(BaseDataset):
         _image_dir = os.path.join(_voc_root, 'JPEGImages')
         # train/val/test splits are pre-cut
         _splits_dir = os.path.join(_voc_root, 'ImageSets/Segmentation')
+        if self.mode == 'testval':
+            self.mode = 'val'
         if self.mode == 'train':
             _split_f = os.path.join(_splits_dir, 'trainval.txt')
         elif self.mode == 'val':

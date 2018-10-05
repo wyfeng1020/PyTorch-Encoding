@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 from __future__ import division
@@ -42,7 +42,8 @@ class DEEPLAB(BaseNet):
     """
     def __init__(self, nclass, backbone, aux=True, se_loss=False, lateral=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(DEEPLAB, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = DEEPLABHead(2048, nclass,lateral=lateral, norm_layer=norm_layer, up_kwargs=self._up_kwargs)
+        self.head = DEEPLABHead(1280, nclass,lateral=False, norm_layer=norm_layer, up_kwargs=self._up_kwargs)
+        #self.head = DEEPLABHead(2048, nclass,lateral=lateral, norm_layer=norm_layer, up_kwargs=self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
@@ -78,7 +79,7 @@ class Classifier_Module(nn.Module):
         for i in range(len(self.conv2d_list)-1):
             out += self.conv2d_list[i+1](x)
         return out
-        
+
 class DEEPLABHead(nn.Module):
     def __init__(self, in_channels, out_channels, lateral=True, norm_layer=None, up_kwargs=None):
         super(DEEPLABHead, self).__init__()
