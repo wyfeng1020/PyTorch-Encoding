@@ -1,0 +1,4 @@
+# ninja log v5
+0	1092	1538517159	roi_align_cpu.o	2c45ccd897597a6b
+0	3092	1538517161	roi_align.o	4f1d658d5f817c6e
+3092	3164	1538517162	enclib_cpu.so	df30b497d0b47bbb

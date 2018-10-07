@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -16,7 +16,7 @@ from torch.nn.parallel.scatter_gather import gather
 
 import encoding.utils as utils
 from encoding.nn import SegmentationLosses, BatchNorm2d, KDLosses
-from encoding.parallel import DataParallelModel, DataParallelCriterion
+from encoding.parallel import DataParallelModel, DataParallelCriterion, DataParallelCriterionKD
 from encoding.datasets import get_segmentation_dataset
 from encoding.models import get_segmentation_model
 
@@ -67,7 +67,7 @@ class Trainer():
             params_list.append({'params': model.head.parameters(), 'lr': args.lr*10})
         if hasattr(model, 'auxlayer'):
             params_list.append({'params': model.auxlayer.parameters(), 'lr': args.lr*10})
-        optimizer = torch.optim.SGD(params_list, 
+        optimizer = torch.optim.SGD(params_list,
                     lr=args.lr,
                     momentum=args.momentum,
                     weight_decay=args.weight_decay)
@@ -122,8 +122,15 @@ class Trainer():
             outputs = self.model(image)
             with torch.no_grad():
                 teacher_outputs = self.teacher_model(image)
+                teacher_targets = []
+                for teacher_output in teacher_outputs:
+                    pred1, se_pred, pred2 = tuple(teacher_output)
+                    teacher_targets.append(pred1)
+                teacher_target = torch.cat(tuple(teacher_targets), 0)
+
             loss_seg = self.criterion(outputs, target)
-            loss_kd = self.criterion_kd(teacher_outputs, outputs)
+
+            loss_kd = self.criterion_kd(outputs, teacher_target)
             loss = loss_seg + loss_kd
             loss.backward()
             self.optimizer.step()

@@ -20,7 +20,7 @@ from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
 
 torch_ver = torch.__version__[:3]
 
-__all__ = ['allreduce', 'DataParallelModel', 'DataParallelCriterion',
+__all__ = ['allreduce', 'DataParallelModel', 'DataParallelCriterion', 'DataParallelCriterionKD'
            'patch_replication_callback']
 
 def allreduce(*inputs):
@@ -134,6 +134,47 @@ class DataParallelCriterion(DataParallel):
         outputs = _criterion_parallel_apply(replicas, inputs, targets, kwargs)
         return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
+
+
+class DataParallelCriterionKD(DataParallel):
+    """
+    Calculate loss in multiple-GPUs, which balance the memory usage for
+    Semantic Segmentation.
+
+    The targets are splitted across the specified devices by chunking in
+    the batch dimension. Please use together with :class:`encoding.parallel.DataParallelModel`.
+
+    Reference:
+        Hang Zhang, Kristin Dana, Jianping Shi, Zhongyue Zhang, Xiaogang Wang, Ambrish Tyagi,
+        Amit Agrawal. “Context Encoding for Semantic Segmentation.
+        *The IEEE Conference on Computer Vision and Pattern Recognition (CVPR) 2018*
+
+    Example::
+
+        >>> net = encoding.nn.DataParallelModel(model, device_ids=[0, 1, 2])
+        >>> criterion = encoding.nn.DataParallelCriterion(criterion, device_ids=[0, 1, 2])
+        >>> y = net(x)
+        >>> loss = criterion(y, target)
+    """
+    def forward(self, inputs, *targets, **kwargs):
+        # input should be already scatterd
+        # scattering the targets instead
+        if not self.device_ids:
+            return self.module(inputs, *targets, **kwargs)
+        #print(len(kwargs))
+        #print(len(targets))
+        tmp_targets, kwargs = self.scatter(targets, kwargs, self.device_ids)
+        #print(len(kwargs))
+        #print(len(targets))
+        #print(len(tmp_targets))
+
+        if len(self.device_ids) == 1:
+            return self.module(inputs, *targets[0], **kwargs[0])
+        replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
+        outputs = _criterion_parallel_apply(replicas, inputs, targets, kwargs)
+        return Reduce.apply(*outputs) / len(outputs)
+        #return self.gather(outputs, self.output_device).mean()
+
 
 
 def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices=None):

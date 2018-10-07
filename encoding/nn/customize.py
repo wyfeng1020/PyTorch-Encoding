@@ -18,7 +18,7 @@ from torch.nn import MSELoss, L1Loss, KLDivLoss
 
 torch_ver = torch.__version__[:3]
 
-__all__ = ['GramMatrix', 'SegmentationLosses', 'View', 'Sum', 'Mean',
+__all__ = ['GramMatrix', 'SegmentationLosses', 'KDLosses', 'View', 'Sum', 'Mean',
            'Normalize', 'PyramidPooling']
 
 class GramMatrix(Module):
@@ -49,7 +49,7 @@ class SegmentationLosses(CrossEntropyLoss):
         self.nclass = nclass
         self.se_weight = se_weight
         self.aux_weight = aux_weight
-        self.bceloss = BCELoss(weight, size_average) 
+        self.bceloss = BCELoss(weight, size_average)
 
     def forward(self, *inputs):
         if not self.se_loss and not self.aux:
@@ -79,7 +79,7 @@ class SegmentationLosses(CrossEntropyLoss):
         batch = target.size(0)
         tvect = Variable(torch.zeros(batch, nclass))
         for i in range(batch):
-            hist = torch.histc(target[i].cpu().data.float(), 
+            hist = torch.histc(target[i].cpu().data.float(),
                                bins=nclass, min=0,
                                max=nclass-1)
             vect = hist>0
@@ -104,10 +104,10 @@ class KDLosses(MSELoss):
 
     def forward(self, *inputs):
         if not self.aux:
-            pred1, se_pred, pred2, target = tuple(inputs)
+            pred1, target = tuple(inputs)
             return super(KDLosses, self).forward(pred1, target)
         else:
-            pred1, se_pred, pred2, target1, target2 = tuple(inputs)
+            pred1, pred2, target1, target2 = tuple(inputs)
             loss1 = super(KDLosses, self).forward(pred1, target1)
             loss2 = super(KDLosses, self).forward(pred2, target2)
             return loss1 + self.aux_weight * loss2
