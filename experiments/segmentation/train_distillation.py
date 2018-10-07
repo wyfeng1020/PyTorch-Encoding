@@ -15,7 +15,7 @@ import torchvision.transforms as transform
 from torch.nn.parallel.scatter_gather import gather
 
 import encoding.utils as utils
-from encoding.nn import SegmentationLosses, BatchNorm2d
+from encoding.nn import SegmentationLosses, BatchNorm2d, KDLosses
 from encoding.parallel import DataParallelModel, DataParallelCriterion
 from encoding.datasets import get_segmentation_dataset
 from encoding.models import get_segmentation_model
@@ -56,7 +56,7 @@ class Trainer():
                                        se_loss = True, norm_layer = BatchNorm2d)
         print(teacher_model)
         checkpoint = torch.load(args.resume_teacher)
-        teacher_model.load_state_dict(checkpoint['state_dict'])
+        teacher_model.load_state_dict(checkpoint)
         self.teacher_model = teacher_model
         self.teacher_model.eval()
 
@@ -77,7 +77,8 @@ class Trainer():
         # criterions
         self.criterion = SegmentationLosses(se_loss=args.se_loss, aux=args.aux,
                                             nclass=self.nclass)
-        self.criterion_kd = torch.nn.MSELoss()
+        self.criterion_kd = KDLosses(se_loss=args.se_loss, aux=args.aux,
+                                            nclass=self.nclass)
         #self.criterion_kd = torch.nn.L1Loss()
 
         self.model, self.optimizer = model, optimizer
@@ -122,7 +123,7 @@ class Trainer():
             with torch.no_grad():
                 teacher_outputs = self.teacher_model(image)
             loss_seg = self.criterion(outputs, target)
-            loss_kd = self.criterion_kd(outputs, teacher_outputs)
+            loss_kd = self.criterion_kd(teacher_outputs, outputs)
             loss = loss_seg + loss_kd
             loss.backward()
             self.optimizer.step()
