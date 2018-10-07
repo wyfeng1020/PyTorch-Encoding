@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -43,8 +43,9 @@ class EncNet(BaseNet):
 class EncModule(nn.Module):
     def __init__(self, in_channels, nclass, ncodes=32, se_loss=True, norm_layer=None):
         super(EncModule, self).__init__()
-        norm_layer = nn.BatchNorm1d if isinstance(norm_layer, nn.BatchNorm2d) else \
-            encoding.nn.BatchNorm1d
+        norm_layer = nn.BatchNorm1d
+        #norm_layer = nn.BatchNorm1d if isinstance(norm_layer, nn.BatchNorm2d) else \
+        #    encoding.nn.BatchNorm1d
         self.se_loss = se_loss
         self.encoding = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, 1, bias=False),

@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 
@@ -12,9 +12,10 @@ import torch
 from torch.utils import data
 import torchvision.transforms as transform
 from torch.nn.parallel.scatter_gather import gather
-
+import torch.nn as nn
 import encoding.utils as utils
-from encoding.nn import SegmentationLosses, BatchNorm2d
+#from encoding.nn import SegmentationLosses, BatchNorm2d
+from encoding.nn import SegmentationLosses
 from encoding.parallel import DataParallelModel, DataParallelCriterion
 from encoding.datasets import get_segmentation_dataset, test_batchify_fn
 from encoding.models import get_model, get_segmentation_model, MultiEvalModule
@@ -53,7 +54,8 @@ def test(args):
     else:
         model = get_segmentation_model(args.model, dataset=args.dataset,
                                        backbone = args.backbone, aux = args.aux,
-                                       se_loss = args.se_loss, norm_layer = BatchNorm2d)
+                                       se_loss = args.se_loss, norm_layer = nn.BatchNorm2d)
+                                       #se_loss = args.se_loss, norm_layer = BatchNorm2d)
         # resuming checkpoint
         if args.resume is None or not os.path.isfile(args.resume):
             raise RuntimeError("=> no checkpoint found at '{}'" .format(args.resume))
