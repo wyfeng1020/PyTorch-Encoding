@@ -24,6 +24,8 @@ class VOCSegmentation(BaseDataset):
         _image_dir = os.path.join(_voc_root, 'JPEGImages')
         # train/val/test splits are pre-cut
         _splits_dir = os.path.join(_voc_root, 'ImageSets/Segmentation')
+        if self.mode == 'testval':
+            self.mode = 'val'
         if self.mode == 'train':
             _split_f = os.path.join(_splits_dir, 'trainval.txt')
         elif self.mode == 'val':

@@ -31,8 +31,12 @@ class BaseNet(nn.Module):
         self.se_loss = se_loss
         self.mean = mean
         self.std = std
+        self.backbone = backbone
         # copying modules from pretrained models
-        if backbone == 'resnet50':
+        if backbone == 'mobilenet':
+            self.pretrained = resnet.mobilenet(pretrained=True, dilated=dilated,
+                                               norm_layer=norm_layer, root=root)
+        elif backbone == 'resnet50':
             self.pretrained = resnet.resnet50(pretrained=True, dilated=dilated,
                                               norm_layer=norm_layer, root=root)
         elif backbone == 'resnet101':
@@ -50,14 +54,21 @@ class BaseNet(nn.Module):
         self._up_kwargs = up_kwargs
 
     def base_forward(self, x):
-        x = self.pretrained.conv1(x)
-        x = self.pretrained.bn1(x)
-        x = self.pretrained.relu(x)
-        x = self.pretrained.maxpool(x)
-        c1 = self.pretrained.layer1(x)
-        c2 = self.pretrained.layer2(c1)
-        c3 = self.pretrained.layer3(c2)
-        c4 = self.pretrained.layer4(c3)
+        if self.backbone == 'mobilenet':
+            x = self.pretrained.features(x)
+            c1 = x
+            c2 = x
+            c3 = x
+            c4 = x
+        else:
+            x = self.pretrained.conv1(x)
+            x = self.pretrained.bn1(x)
+            x = self.pretrained.relu(x)
+            x = self.pretrained.maxpool(x)
+            c1 = self.pretrained.layer1(x)
+            c2 = self.pretrained.layer2(c1)
+            c3 = self.pretrained.layer3(c2)
+            c4 = self.pretrained.layer4(c3)
         return c1, c2, c3, c4
 
     def evaluate(self, x, target=None):

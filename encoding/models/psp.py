@@ -17,7 +17,8 @@ from ..nn import PyramidPooling
 class PSP(BaseNet):
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(PSP, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = PSPHead(2048, nclass, norm_layer, self._up_kwargs)
+        #self.head = PSPHead(2048, nclass, norm_layer, self._up_kwargs)
+        self.head = PSPHead(1280, nclass, norm_layer, self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 

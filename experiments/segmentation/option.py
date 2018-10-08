@@ -78,6 +78,8 @@ class Options():
                             help='path to test image folder')
         parser.add_argument("--save", type=str, default='./result/cityscapes',
                             help="Path to save result.")
+        parser.add_argument('--resume_teacher', type=str, default=None,
+                            help='put the path to resuming file if needed')
         # the parser
         self.parser = parser
 

@@ -42,7 +42,8 @@ class DEEPLAB(BaseNet):
     """
     def __init__(self, nclass, backbone, aux=True, se_loss=False, lateral=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(DEEPLAB, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = DEEPLABHead(2048, nclass,lateral=lateral, norm_layer=norm_layer, up_kwargs=self._up_kwargs)
+        #elf.head = DEEPLABHead(2048, nclass,lateral=lateral, norm_layer=norm_layer, up_kwargs=self._up_kwargs)
+        self.head = DEEPLABHead(1280, nclass, lateral=False, norm_layer=norm_layer, up_kwargs=self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 

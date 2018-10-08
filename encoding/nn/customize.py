@@ -14,10 +14,11 @@ from torch.nn import Module, Sequential, Conv2d, ReLU, AdaptiveAvgPool2d, \
     NLLLoss, BCELoss, CrossEntropyLoss, AvgPool2d, MaxPool2d, Parameter
 from torch.nn import functional as F
 from torch.autograd import Variable
+from torch.nn import MSELoss, L1Loss, KLDivLoss
 
 torch_ver = torch.__version__[:3]
 
-__all__ = ['GramMatrix', 'SegmentationLosses', 'View', 'Sum', 'Mean',
+__all__ = ['GramMatrix', 'SegmentationLosses', 'KDLosses', 'View', 'Sum', 'Mean',
            'Normalize', 'PyramidPooling']
 
 class GramMatrix(Module):
@@ -85,6 +86,29 @@ class SegmentationLosses(CrossEntropyLoss):
             tvect[i] = vect
         return tvect
 
+
+class KDLosses(MSELoss):
+    """2D Cross Entropy Loss with Auxilary Loss"""
+
+    def __init__(self, se_loss=False, se_weight=0.1, nclass=-1,
+                 aux=False, aux_weight=0.2):
+        super(KDLosses, self).__init__()
+        self.se_loss = se_loss
+        self.aux = aux
+        self.nclass = nclass
+        self.se_weight = se_weight
+        self.aux_weight = aux_weight
+        self.mseloss = MSELoss()
+
+    def forward(self, *inputs):
+        if not self.aux:
+            pred1, target = tuple(inputs)
+            return super(KDLosses, self).forward(pred1, target)
+        else:
+            pred1, pred2, target1, target2 = tuple(inputs)
+            loss1 = super(KDLosses, self).forward(pred1, target1)
+            loss2 = super(KDLosses, self).forward(pred2, target2)
+            return loss1 + self.aux_weight * loss2
 
 class View(Module):
     """Reshape the input into different size, an inplace operator, support
