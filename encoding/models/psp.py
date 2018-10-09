@@ -1,6 +1,6 @@
 ###########################################################################
-# Created by: Hang Zhang 
-# Email: zhang.hang@rutgers.edu 
+# Created by: Hang Zhang
+# Email: zhang.hang@rutgers.edu
 # Copyright (c) 2017
 ###########################################################################
 from __future__ import division
@@ -15,10 +15,10 @@ from .fcn import FCNHead
 from ..nn import PyramidPooling
 
 class PSP(BaseNet):
-    def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
+    def __init__(self, num_channels, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(PSP, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
         #self.head = PSPHead(2048, nclass, norm_layer, self._up_kwargs)
-        self.head = PSPHead(1280, nclass, norm_layer, self._up_kwargs)
+        self.head = PSPHead(num_channels, nclass, norm_layer, self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
@@ -51,7 +51,7 @@ class PSPHead(nn.Module):
     def forward(self, x):
         return self.conv5(x)
 
-def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+def get_psp(num_channels=2048, dataset='pascal_voc', backbone='resnet50', pretrained=False,
             root='~/.encoding/models', **kwargs):
     acronyms = {
         'pascal_voc': 'voc',
@@ -62,7 +62,7 @@ def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
     }
     # infer number of classes
     from ..datasets import datasets, VOCSegmentation, VOCAugSegmentation, ADE20KSegmentation, ContextSegmentation
-    model = PSP(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
+    model = PSP(num_channels, datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file
         model.load_state_dict(torch.load(
