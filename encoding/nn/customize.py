@@ -49,7 +49,7 @@ class SegmentationLosses(CrossEntropyLoss):
         self.nclass = nclass
         self.se_weight = se_weight
         self.aux_weight = aux_weight
-        self.bceloss = BCELoss(weight, size_average) 
+        self.bceloss = BCELoss(weight, size_average)
 
     def forward(self, *inputs):
         if not self.se_loss and not self.aux:
@@ -79,7 +79,7 @@ class SegmentationLosses(CrossEntropyLoss):
         batch = target.size(0)
         tvect = Variable(torch.zeros(batch, nclass))
         for i in range(batch):
-            hist = torch.histc(target[i].cpu().data.float(), 
+            hist = torch.histc(target[i].cpu().data.float(),
                                bins=nclass, min=0,
                                max=nclass-1)
             vect = hist>0

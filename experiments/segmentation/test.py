@@ -52,7 +52,7 @@ def test(args):
     if args.model_zoo is not None:
         model = get_model(args.model_zoo, pretrained=True)
     else:
-        model = get_segmentation_model(args.model, dataset=args.dataset,
+        model = get_segmentation_model(args.model, num_channels=1280, dataset=args.dataset,
                                        backbone = args.backbone, aux = args.aux,
                                        se_loss = args.se_loss, norm_layer = nn.BatchNorm2d)
                                        #se_loss = args.se_loss, norm_layer = BatchNorm2d)

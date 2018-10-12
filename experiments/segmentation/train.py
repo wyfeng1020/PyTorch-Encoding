@@ -26,7 +26,7 @@ torch_ver = torch.__version__[:3]
 if torch_ver == '0.3':
     from torch.autograd import Variable
 
-
+'''
 def get_1x_lr_params_NOscale(model):
     b = []
     b.append(model.conv1)
@@ -43,7 +43,18 @@ def get_1x_lr_params_NOscale(model):
                 jj+=1
                 if k.requires_grad:
                     yield k
+'''
 
+def get_1x_lr_params_NOscale(model):
+    b = []
+    b.append(model.features)
+    for i in range(len(b)):
+        for j in b[i].modules():
+            jj = 0
+            for k in j.parameters():
+                jj+=1
+                if k.requires_grad:
+                    yield k
 
 class Trainer():
     def __init__(self, args):
@@ -66,7 +77,7 @@ class Trainer():
                                          drop_last=False, shuffle=False, **kwargs)
         self.nclass = trainset.num_class
         # model
-        model = get_segmentation_model(args.model, dataset=args.dataset,
+        model = get_segmentation_model(args.model, num_channels=1280, dataset=args.dataset,
                                        backbone = args.backbone, aux = args.aux,
                                        se_loss = args.se_loss)
         print(model)
