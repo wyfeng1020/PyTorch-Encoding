@@ -90,7 +90,7 @@ class SegmentationLosses(CrossEntropyLoss):
 
 
 
-class KDLosses(MSELoss):
+class KDLosses(L1Loss):
     """2D Cross Entropy Loss with Auxilary Loss"""
     def __init__(self, se_loss=False, se_weight=0.1, nclass=-1,
                  aux=False, aux_weight=0.2):

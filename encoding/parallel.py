@@ -161,13 +161,7 @@ class DataParallelCriterionKD(DataParallel):
         # scattering the targets instead
         if not self.device_ids:
             return self.module(inputs, *targets, **kwargs)
-        #print(len(kwargs))
-        #print(len(targets))
-        tmp_targets, kwargs = self.scatter(targets, kwargs, self.device_ids)
-        #print(len(kwargs))
-        #print(len(targets))
-        #print(len(tmp_targets))
-
+        targets, kwargs = self.scatter(targets, kwargs, self.device_ids)
         if len(self.device_ids) == 1:
             return self.module(inputs, *targets[0], **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])

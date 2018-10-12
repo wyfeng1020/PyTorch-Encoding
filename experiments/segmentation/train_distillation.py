@@ -50,11 +50,11 @@ class Trainer():
         model = get_segmentation_model(args.model, dataset=args.dataset,
                                        backbone = args.backbone, aux = args.aux,
                                        se_loss = args.se_loss, norm_layer = BatchNorm2d)
-        print(model)
+        #print(model)
         teacher_model = get_segmentation_model('encnet', dataset=args.dataset,
                                        backbone = 'resnet50', aux = True,
                                        se_loss = True, norm_layer = BatchNorm2d)
-        print(teacher_model)
+        #print(teacher_model)
         checkpoint = torch.load(args.resume_teacher)
         teacher_model.load_state_dict(checkpoint)
         self.teacher_model = teacher_model
@@ -87,7 +87,7 @@ class Trainer():
             self.model = DataParallelModel(self.model).cuda()
             self.teacher_model = DataParallelModel(self.teacher_model).cuda()
             self.criterion = DataParallelCriterion(self.criterion).cuda()
-            self.criterion_kd = DataParallelCriterion(self.criterion_kd).cuda()
+            self.criterion_kd = DataParallelCriterionKD(self.criterion_kd).cuda()
         # resuming checkpoint
         if args.resume is not None:
             if not os.path.isfile(args.resume):
@@ -127,16 +127,21 @@ class Trainer():
                     pred1, se_pred, pred2 = tuple(teacher_output)
                     teacher_targets.append(pred1)
                 teacher_target = torch.cat(tuple(teacher_targets), 0)
+                teacher_target = teacher_target.detach()
 
+            loss_seg = 0
             loss_seg = self.criterion(outputs, target)
-
-            loss_kd = self.criterion_kd(outputs, teacher_target)
-            loss = loss_seg + loss_kd
-            loss.backward()
-            self.optimizer.step()
+            loss_seg.backward(retain_graph=True)
             train_loss += loss_seg.item()
+
+
+            #loss_kd = self.criterion_kd(outputs, teacher_target)
+            loss_kd = self.criterion_kd(outputs, teacher_target)
+            loss_kd.backward()
             teacher_loss += loss_kd.item()
-            #tbar.set_description('Train loss: %.3f' % (train_loss / (i + 1)))
+            loss = loss_seg + loss_kd
+            #loss.backward()
+            self.optimizer.step()
             tbar.set_description('Train loss: %.3f, Teacher loss: %.3f' % (train_loss / (i + 1), teacher_loss / (i + 1)))
 
         if self.args.no_val:
