@@ -11,3 +11,4 @@ encoding.egg-info/
 encoding/lib/cpu
 experiments/segmentation/runs
 .idea/
+experiments/segmentation/result/

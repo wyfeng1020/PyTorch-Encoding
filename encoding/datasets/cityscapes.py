@@ -125,8 +125,8 @@ class CityscapesSegmentation(BaseDataset):
         if self.target_transform is not None:
             #print("transform for label")
             target = self.target_transform(target)
-        #return img, target, self.names[index]
-        return img, target
+        return img, target, self.names[index]
+        #return img, target
 
     def label_mapping(self, input, mapping):
         output = np.copy(input)
