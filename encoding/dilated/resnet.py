@@ -7,12 +7,17 @@ import os
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet101coco',
            'resnet152', 'BasicBlock', 'Bottleneck']
 
+#model_urls = {
+#    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+#    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
+#    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+#    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
+#    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
+#}
+
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
 }
 
 affine_par = True
@@ -149,15 +154,33 @@ class ResNet(nn.Module):
         - Yu, Fisher, and Vladlen Koltun. "Multi-scale context aggregation by dilated convolutions."
     """
     # pylint: disable=unused-variable
-    def __init__(self, block, layers, num_classes=1000, dilated=True, norm_layer=nn.BatchNorm2d):
-        self.inplanes = 64
+    def __init__(self, block, layers, num_classes=1000, dilated=True, deep_base=True, norm_layer=nn.BatchNorm2d):
+        #self.inplanes = 64
+        self.inplanes = 128 if deep_base else 64
         super(ResNet, self).__init__()
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+        if deep_base:
+            self.conv1 = nn.Sequential(
+                nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
+                #norm_layer(64),
+                nn.BatchNorm2d(64, affine=affine_par),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False),
+                #norm_layer(64),
+                nn.BatchNorm2d(64, affine=affine_par),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False),
+            )
+            #for m in self.conv1.modules():
+            #    if isinstance(m, nn.BatchNorm2d):
+            #        for i in m.parameters():
+            #            i.requires_grad = False
+        else:
+            self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
         #self.bn1 = norm_layer(64)
         self.bn1 = nn.BatchNorm2d(64, affine = affine_par)
-        for i in self.bn1.parameters():
-            i.requires_grad = False
+        #for i in self.bn1.parameters():
+        #    i.requires_grad = False
 
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -310,5 +333,8 @@ def resnet152(pretrained=False, root='~/.encoding/models', **kwargs):
     """
     model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
+        #model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
+        from ..models.model_store import get_model_file
+        model.load_state_dict(torch.load(
+            get_model_file('resnet152', root=root)), strict=False)
     return model
