@@ -24,13 +24,15 @@ __all__ = ['BaseNet', 'MultiEvalModule', 'MultiEvalModuleCityscapes']
 
 class BaseNet(nn.Module):
     def __init__(self, nclass, backbone, aux, se_loss, dilated=True, norm_layer=None,
-                 mean=[.485, .456, .406], std=[.229, .224, .225], root='~/.encoding/models'):
+                 base_size=520, crop_size=480, mean=[.485, .456, .406], std=[.229, .224, .225], root='~/.encoding/models'):
         super(BaseNet, self).__init__()
         self.nclass = nclass
         self.aux = aux
         self.se_loss = se_loss
         self.mean = mean
         self.std = std
+        self.base_size = base_size
+        self.crop_size = crop_size
         self.backbone = backbone
         # copying modules from pretrained models
         if backbone == 'mobilenet':
@@ -86,15 +88,16 @@ class MultiEvalModule(DataParallel):
     """Multi-size Segmentation Eavluator"""
     def __init__(self, module, nclass, device_ids=None,
                  base_size=520, crop_size=480, flip=True,
-                 scales=[1.0]):
-                 #scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75]):
+                 #scales=[1.0]):
+                 scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75]):
         super(MultiEvalModule, self).__init__(module, device_ids)
         self.nclass = nclass
-        self.base_size = base_size
-        self.crop_size = crop_size
+        self.base_size = module.base_size
+        self.crop_size = module.crop_size
         self.scales = scales
         self.flip = flip
-        self.flip = False
+        print('MultiEvalModule: base_size {}, crop_size {}'. \
+            format(self.base_size, self.crop_size))
 
     def parallel_forward(self, inputs, **kwargs):
         """Multi-GPU Mult-size Evaluation
@@ -183,17 +186,18 @@ class MultiEvalModule(DataParallel):
 
 class MultiEvalModuleCityscapes(DataParallel):
     """Multi-size Segmentation Eavluator"""
-    def __init__(self, module, nclass, device_ids=None,
-                 base_size=512, crop_size=512, flip=True,
-                 scales=[1.5, 1.75, 2.0, 2.25, 2.5, 2.75]):
+    def __init__(self, module, nclass, device_ids=None, flip=True,
+                 scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25]):
         super(MultiEvalModuleCityscapes, self).__init__(module, device_ids)
         self.nclass = nclass
-        self.base_size = base_size
-        self.crop_size = crop_size
+        self.base_size = module.base_size
+        self.crop_size = module.crop_size
         self.crop_size_h = self.crop_size
         self.crop_size_w = self.crop_size * 2
         self.scales = scales
         self.flip = flip
+        print('MultiEvalModule: base_size {}, crop_size {}'. \
+            format(self.base_size, self.crop_size))
 
     def parallel_forward(self, inputs, **kwargs):
         """Multi-GPU Mult-size Evaluation

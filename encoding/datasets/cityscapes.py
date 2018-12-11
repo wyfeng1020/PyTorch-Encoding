@@ -13,7 +13,8 @@ class CityscapesSegmentation(BaseDataset):
     BASE_DIR = 'Cityscapes/data'
     def __init__(self, root=os.path.expanduser('~/.encoding/data'), split='train', mode=None, transform=None,
                  target_transform=None):
-        super(CityscapesSegmentation, self).__init__(root, split, mode, transform, target_transform,base_size=512, crop_size=512)
+        #super(CityscapesSegmentation, self).__init__(root, split, mode, transform, target_transform,base_size=512, crop_size=512)
+        super(CityscapesSegmentation, self).__init__(root, split, mode, transform, target_transform)
         _cityscapes_root = os.path.join(self.root, self.BASE_DIR)
         _mask_dir = os.path.join(_cityscapes_root, 'gtFine')
         _image_dir = os.path.join(_cityscapes_root, 'leftImg8bit')
@@ -48,21 +49,6 @@ class CityscapesSegmentation(BaseDataset):
         if self.mode != 'test':
             assert (len(self.images) == len(self.masks))
 
-    def _val_sync_transform(self, img, mask):
-
-        w, h = img.size
-        oh = self.crop_size_h
-        ow = int(1.0 * w * oh / h)
-        img = img.resize((ow, oh), Image.BILINEAR)
-        mask = mask.resize((ow, oh), Image.NEAREST)
-        # center crop
-        w, h = img.size
-        x1 = int(round((w - self.crop_size_w) / 2.))
-        y1 = int(round((h - self.crop_size_h) / 2.))
-        img = img.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
-        mask = mask.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
-        # final transform
-        return img, self._mask_transform(mask)
 
     def _sync_transform(self, img, mask):
         # random mirror
@@ -70,10 +56,18 @@ class CityscapesSegmentation(BaseDataset):
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
             mask = mask.transpose(Image.FLIP_LEFT_RIGHT)
         # random scale (short edge from 480 to 720)
+        crop_size = self.crop_size
         short_size = random.randint(int(self.base_size*0.5), int(self.base_size*2.0))
         w, h = img.size
-        oh = short_size
-        ow = int(1.0 * w * oh / h)
+        if h > w:
+            ow = short_size
+            oh = int(1.0 * h * ow / w)
+        else:
+            oh = short_size
+            ow = int(1.0 * w * oh / h)
+
+        #oh = short_size
+        #ow = int(1.0 * w * oh / h)
         img = img.resize((ow, oh), Image.BILINEAR)
         mask = mask.resize((ow, oh), Image.NEAREST)
         # random rotate -10~10, mask using NN rotate
@@ -81,17 +75,17 @@ class CityscapesSegmentation(BaseDataset):
         img = img.rotate(deg, resample=Image.BILINEAR)
         mask = mask.rotate(deg, resample=Image.NEAREST)
         # pad crop
-        if oh < self.crop_size_h:
-            padh = self.crop_size_h - oh if oh < self.crop_size_h else 0
-            padw = self.crop_size_w - ow if ow < self.crop_size_w else 0
+        if short_size < crop_size:
+            padh = crop_size - oh if oh < crop_size else 0
+            padw = crop_size - ow if ow < crop_size else 0
             img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)
             mask = ImageOps.expand(mask, border=(0, 0, padw, padh), fill=0)
         # random crop crop_size
         w, h = img.size
-        x1 = random.randint(0, w - self.crop_size_w)
-        y1 = random.randint(0, h - self.crop_size_h)
-        img = img.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
-        mask = mask.crop((x1, y1, x1+self.crop_size_w, y1+self.crop_size_h))
+        x1 = random.randint(0, w - crop_size)
+        y1 = random.randint(0, h - crop_size)
+        img = img.crop((x1, y1, x1+crop_size, y1+crop_size))
+        mask = mask.crop((x1, y1, x1+crop_size, y1+crop_size))
         # gaussian blur as in PSP
         if random.random() < 0.5:
             img = img.filter(ImageFilter.GaussianBlur(
@@ -107,9 +101,9 @@ class CityscapesSegmentation(BaseDataset):
                 img = self.transform(img)
             return img, os.path.basename(self.images[index])
         target = Image.open(self.masks[index])
-        img = img.resize((self.crop_size_w, self.crop_size_h), Image.BILINEAR)
-        if self.mode != 'testval':
-            target = target.resize((self.crop_size_w, self.crop_size_h), Image.NEAREST)
+        #img = img.resize((self.crop_size_w, self.crop_size_h), Image.BILINEAR)
+        #if self.mode != 'testval':
+        #    target = target.resize((self.crop_size_w, self.crop_size_h), Image.NEAREST)
         # synchrosized transform
         if self.mode == 'train':
             img, target = self._sync_transform( img, target)
